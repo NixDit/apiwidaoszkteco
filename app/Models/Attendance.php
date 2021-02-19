@@ -17,4 +17,12 @@ class Attendance extends Model
         'timestamp',
         'type'
     ];
+
+    public function scopeFindAttendance($query,$id){
+        return $this->where('id_code',$id)->get();
+    }
+
+    public function scopeCreateAttendance($query,$data){
+        return $this->create($data);
+    }
 }

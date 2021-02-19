@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use Rats\Zkteco\Lib\ZKTeco;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,19 +61,37 @@ class ZktecoController extends Controller
     }
 
     public function updateDataAttendance($id){
-        // dd($this->data->getAttendance());
-        // dd(DB::table('employees')->get());
         $error  = false;
         $msg    = null;
         $status = 404;
-        // try {
+        $info   = [];
+        try {
+            $actualAttendance = Attendance::FindAttendance($id);
+            if(count($actualAttendance) > 0){
+                foreach ($actualAttendance as $value) {
+                    Attendance::find($value->id)->delete();
+                }
+            }
             $data = collect($this->data->getAttendance())->where('id',$id);
-        // } catch (\Throwable $th) {
-        //     $error  = true;
-        //     $msg    = 'Ocurrió un error al actualizar entradas/salidas:'.$th->getMessage();
-        //     $status = 500;
-        // }
-        return response()->json($this->data->getAttendance());
+            foreach ($data as $value) {
+                $info['uid']       = $value['uid'];
+                $info['id_code']   = $value['id'];
+                $info['state']     = $value['state'];
+                $info['timestamp'] = $value['timestamp'];
+                $info['type']      = $value['type'];
+                Attendance::CreateAttendance($info);
+            }
+            $status = 201;
+        } catch (\Throwable $th) {
+            $error  = true;
+            $msg    = 'Ocurrió un error al actualizar entradas/salidas:'.$th->getMessage();
+            $status = 500;
+        }
+        return response()->json(array(
+            'error' => $error,
+            'msg' => $msg,
+            'status' => $status
+        ));
     }
 
     public function saveUser(Request $request){
