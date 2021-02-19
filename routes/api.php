@@ -15,6 +15,6 @@ use App\Http\Controllers\ZktecoController;
 |
 */
 
-Route::middleware('api')->get('/updateDataAttendance',[ZktecoController::class,'updateDataAttendance']);
+Route::middleware('api')->get('/updateDataAttendance/{id}',[ZktecoController::class,'updateDataAttendance']);
 Route::middleware('api')->post('/saveUser',[ZktecoController::class,'saveUser']);
 Route::middleware('api')->post('/deleteUser',[ZktecoController::class,'deleteUser']);

@@ -59,14 +59,14 @@ class ZktecoController extends Controller
         }
     }
 
-    public function updateDataAttendance(){
+    public function updateDataAttendance($id){
         // dd($this->data->getAttendance());
         // dd(DB::table('employees')->get());
         $error  = false;
         $msg    = null;
         $status = 404;
         // try {
-        //     //code...
+            $data = collect($this->data->getAttendance())->where('id',$id);
         // } catch (\Throwable $th) {
         //     $error  = true;
         //     $msg    = 'Ocurrió un error al actualizar entradas/salidas:'.$th->getMessage();
