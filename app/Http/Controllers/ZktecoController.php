@@ -88,8 +88,8 @@ class ZktecoController extends Controller
             $status = 500;
         }
         return response()->json(array(
-            'error' => $error,
-            'msg' => $msg,
+            'error'  => $error,
+            'msg'    => $msg,
             'status' => $status
         ));
     }
