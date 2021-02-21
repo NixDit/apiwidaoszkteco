@@ -20,59 +20,22 @@ class ZktecoController extends Controller
     // 50  = entrada horas extra
     // 60  = salida horas extra
 
-    public function __construct() {
-        $ip   = config('app.zkteco_ip');
-        $port = (int)config('app.zkteco_port');;
-        $this->data = new ZKTeco($ip,$port);
-        $this->setConection();
-    }
-    public function setConection(){
-        try {
-            $this->data->connect();
-            if($this->data->_data_recv != ''){
-                if($this->data->connect()){
-                    $this->status = array(
-                        'error'   => false,
-                        'status'  => 'success',
-                        'message' => 'Conexión con el checador exitosa'
-                    );
-                } else {
-                    $this->status = array(
-                        'error'   => true,
-                        'status'  => 'error',
-                        'message' => 'Conexión con el checador fallida'
-                    );
-                }
-                
-            } else {
-                $this->status = array(
-                    'error'   => true,
-                    'status'  => 'error',
-                    'message' => 'Conexión con el checador fallida'
-                );
-            }
-        } catch (\Throwable $th) {
-            $this->status = array(
-                'error'   => true,
-                'status'  => 'error',
-                'message' => 'Conexión con el checador fallida'
-            );
-        }
-    }
-
     public function updateDataAttendance($id){
         $error  = false;
         $msg    = null;
         $status = 404;
         $info   = [];
         try {
+            $zkteco = new ZKTeco(config('app.zkteco_ip'),(int)config('app.zkteco_port'));
+            $zkteco->connect();
+            $zkteco->disableDevice();
             $actualAttendance = Attendance::FindAttendance($id);
             if(count($actualAttendance) > 0){
                 foreach ($actualAttendance as $value) {
                     Attendance::find($value->id)->delete();
                 }
             }
-            $data = collect($this->data->getAttendance())->where('id',$id);
+            $data = collect($zkteco->getAttendance())->where('id',$id);
             foreach ($data as $value) {
                 $info['uid']       = $value['uid'];
                 $info['id_code']   = $value['id'];
@@ -87,6 +50,8 @@ class ZktecoController extends Controller
             $msg    = 'Ocurrió un error al actualizar entradas/salidas:'.$th->getMessage();
             $status = 500;
         }
+        $zkteco->enableDevice();
+        $zkteco->disconnect();
         return response()->json(array(
             'error'  => $error,
             'msg'    => $msg,
@@ -99,12 +64,15 @@ class ZktecoController extends Controller
         $msg   = null;
         $status = 404;
         try {
+            $zkteco = new ZKTeco(config('app.zkteco_ip'),(int)config('app.zkteco_port'));
+            $zkteco->connect();
+            $zkteco->disableDevice();
             $employee = $request;
-            $this->data->setUser(
+            $zkteco->setUser(
                 $employee->code,
                 $employee->code,
-                $employee->name
-                ,''
+                $employee->name,
+                ''
             );
             $status = 201;
         } catch (\Throwable $th) {
@@ -112,6 +80,8 @@ class ZktecoController extends Controller
             $msg    = 'Ocurrió un error al guardar usuario ZKTeco:'.$th->getMessage();
             $status = 500;
         }
+        $zkteco->enableDevice();
+        $zkteco->disconnect();
         return response()->json(array(
             'error'  => $error,
             'msg'    => $msg,
@@ -124,14 +94,19 @@ class ZktecoController extends Controller
         $msg   = null;
         $status = 404;
         try {
+            $zkteco = new ZKTeco(config('app.zkteco_ip'),(int)config('app.zkteco_port'));
+            $zkteco->connect();
+            $zkteco->disableDevice();
             $employee = $request;
-            $this->data->removeUser($employee->code);
+            $zkteco->removeUser($employee->code);
             $status = 201;
         } catch (\Throwable $th) {
             $error  = true;
             $msg    = 'Ocurrió un error al guardar usuario ZKTeco:'.$th->getMessage();
             $status = 500;
         }
+        $zkteco->enableDevice();
+        $zkteco->disconnect();
         return response()->json(array(
             'error'  => $error,
             'msg'    => $msg,
