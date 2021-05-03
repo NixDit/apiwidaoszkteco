@@ -26,24 +26,19 @@ class ZktecoController extends Controller
         $status = 404;
         $info   = [];
         try {
-            $zkteco = new ZKTeco(config('app.zkteco_ip'),(int)config('app.zkteco_port'));
+            $zkteco = new ZKTeco(config('app.zkteco_ip'),(int)config('app.zkteco_port')); // Configurar de acuerdo a la IP local asignada al checador en la red.
             $zkteco->connect();
             $zkteco->disableDevice();
-            $actualAttendance = Attendance::FindAttendance($id);
-            if(count($actualAttendance) > 0){
-                foreach ($actualAttendance as $value) {
-                    Attendance::find($value->id)->delete();
-                }
-            }
-            $data = collect($zkteco->getAttendance())->where('id',$id);
+            $data = collect($zkteco->getAttendance());
             foreach ($data as $value) {
                 $info['uid']       = $value['uid'];
                 $info['id_code']   = $value['id'];
                 $info['state']     = $value['state'];
                 $info['timestamp'] = $value['timestamp'];
                 $info['type']      = $value['type'];
-                Attendance::CreateAttendance($info);
+                Attendance::CreateAttendance($info); // Configurar de acuerdo a la tabla establecida.
             }
+            $zkteco->clearAttendance();
             $status = 201;
         } catch (\Throwable $th) {
             $error  = true;
@@ -102,7 +97,7 @@ class ZktecoController extends Controller
             $status = 201;
         } catch (\Throwable $th) {
             $error  = true;
-            $msg    = 'Ocurrió un error al guardar usuario ZKTeco:'.$th->getMessage();
+            $msg    = 'Ocurrió un error al eliminar usuario ZKTeco:'.$th->getMessage();
             $status = 500;
         }
         $zkteco->enableDevice();
