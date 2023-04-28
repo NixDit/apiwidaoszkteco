@@ -15,6 +15,11 @@ use App\Http\Controllers\ZktecoController;
 |
 */
 
+// Checador 1
 Route::middleware('api')->get('/updateDataAttendance/{id}',[ZktecoController::class,'updateDataAttendance']);
 Route::middleware('api')->post('/saveUser',[ZktecoController::class,'saveUser']);
 Route::middleware('api')->post('/deleteUser',[ZktecoController::class,'deleteUser']);
+// Checador 2
+Route::middleware('api')->get('/updateDataAttendance_2/{id}',[ZktecoController::class,'updateDataAttendance2']);
+Route::middleware('api')->post('/saveUser_2',[ZktecoController::class,'saveUser2']);
+Route::middleware('api')->post('/deleteUser_2',[ZktecoController::class,'deleteUser2']);
